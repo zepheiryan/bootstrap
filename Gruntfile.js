@@ -6,7 +6,7 @@ module.exports = function(grunt) {
     ngversion: '1.1.5',
     pkg: grunt.file.readJSON('package.json'),
     dist: 'dist',
-    project: 'bootstrap',
+    project: 'ui.bootstrap',
     templateRoot: 'template',
     frameworks: ['bootstrap', 'foundation'],
     meta: {
@@ -42,7 +42,7 @@ module.exports = function(grunt) {
           banner: '<%= meta.banner + meta.bundle() %>',
           footer: '<%= meta.footer %>'
         },
-        src: ['<%= concat.js.dest %>', '<%= html2js.dist.dest %>'],
+        src: ['src/*/*.js', 'src/*/<%= framework %>/*.js', '!src/**/*.spec.js', '<%= html2js.dist.dest %>'],
         dest: '<%=dist%>/<%= project %>-<%= framework %>-<%= pkg.version%>-bundle.js'
       }
     },
