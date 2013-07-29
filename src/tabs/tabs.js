@@ -9,6 +9,12 @@
 
 angular.module('ui.bootstrap.tabs', [])
 
+.directive('tabs', function() {
+  return function() {
+    throw new Error("The `tabs` directive is deprecated, please migrate to `tabset`. Instructions can be found at http://github.com/angular-ui/bootstrap/tree/master/CHANGELOG.md");
+  };
+})
+
 .controller('TabsetController', ['$scope', '$element',
 function TabsetCtrl($scope, $element) {
 
@@ -76,7 +82,7 @@ function TabsetCtrl($scope, $element) {
     require: '^tabset',
     scope: {},
     controller: 'TabsetController',
-    templateUrl: templateUrlFactory('tabs/tabset.html'),
+    templateUrl: 'template/tabs/tabset.html',
     compile: function(elm, attrs, transclude) {
       return function(scope, element, attrs, tabsetCtrl) {
         scope.vertical = angular.isDefined(attrs.vertical) ? scope.$eval(attrs.vertical) : false;
@@ -176,7 +182,7 @@ function($parse, $http, $templateCache, $compile) {
     require: '^tabset',
     restrict: 'EA',
     replace: true,
-    templateUrl: templateUrlFactory('tabs/tab.html'),
+    templateUrl: 'template/tabs/tab.html',
     transclude: true,
     scope: {
       heading: '@',
@@ -241,25 +247,6 @@ function($parse, $http, $templateCache, $compile) {
   };
 }])
 
-.directive('tabsetTitles', function() {
-  return {
-    restrict: 'A',
-    require: '^tabset',
-    templateUrl: templateUrlFactory('tabs/tabset-titles.html'),
-    replace: true,
-    link: function(scope, elm, attrs, tabsetCtrl) {
-      if (!scope.$eval(attrs.tabsetTitles)) {
-        elm.remove();
-      } else {
-        //now that tabs location has been decided, transclude the tab titles in
-        tabsetCtrl.$transcludeFn(tabsetCtrl.$scope.$parent, function(node) {
-          elm.append(node);
-        });
-      }
-    }
-  };
-})
-
 .directive('tabHeadingTransclude', [function() {
   return {
     restrict: 'A',
@@ -306,4 +293,24 @@ function($parse, $http, $templateCache, $compile) {
   }
 }])
 
+.directive('tabsetTitles', function($http) {
+  return {
+    restrict: 'A',
+    require: '^tabset',
+    templateUrl: 'template/tabs/tabset-titles.html',
+    replace: true,
+    link: function(scope, elm, attrs, tabsetCtrl) {
+      if (!scope.$eval(attrs.tabsetTitles)) {
+        elm.remove();
+      } else {
+        //now that tabs location has been decided, transclude the tab titles in
+        tabsetCtrl.$transcludeFn(tabsetCtrl.$scope.$parent, function(node) {
+          elm.append(node);
+        });
+      }
+    }
+  };
+})
+
 ;
+

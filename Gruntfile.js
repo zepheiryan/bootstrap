@@ -8,6 +8,7 @@ module.exports = function(grunt) {
     dist: 'dist',
     project: 'bootstrap',
     templateRoot: 'template',
+    frameworks: ['bootstrap', 'foundation'],
     meta: {
       banner: '(function() {',
       module: templateReader('build/module.js'),
@@ -19,7 +20,7 @@ module.exports = function(grunt) {
     watch: {
       html: {
         files: ['src/**/*.html'],
-        tasks: ['tml2js', 'karma:watch:run']
+        tasks: ['html2js', 'karma:watch:run']
       },
       js: {
         files: ['src/**/*.js'],
@@ -51,7 +52,7 @@ module.exports = function(grunt) {
         options: {
           module: '<%= project %>.<%= framework %>-templates',
           base: 'src',
-          rename: html2jsTemplateRename,
+          rename: html2jsTemplateRename
         },
         src: ['src/*/*.html', 'src/*/<%= framework %>/*.html'],
         dest: '<%= dist %>/<%= project %>-<%= framework %>-<%= pkg.version %>-html.js'
@@ -82,12 +83,22 @@ module.exports = function(grunt) {
 
     karma: {
       options: {
-        configFile: 'config/karma.conf.js'
+        configFile: 'config/karma.conf.js',
+        files: [
+          'config/vendor/jquery.js',
+          'config/vendor/angular.js',
+          'config/vendor/angular-mocks.js',
+          'config/vendor/test-helpers.js',
+           'src/*/*.js', 
+           'src/*/<%= framework %>/*.js',
+           '<%= html2js.dist.dest %>'
+        ]
       },
       watch: {
         background: true
       },
       continuous: {
+        browsers: [process.env.TRAVIS ? 'Firefox' : 'Chrome'],
         singleRun: true
       },
       travis: {
@@ -106,7 +117,7 @@ module.exports = function(grunt) {
         dest: 'dist/docs',
         scripts: [
           'angular.js',
-          '<%= concat.dist.dest %>',
+          '<%= concat.dist.dest %>'
         ],
         styles: [
           'docs/css/style.css'
@@ -124,12 +135,28 @@ module.exports = function(grunt) {
     }
   });
 
-  grunt.registerTask('build', function(framework) {
-    grunt.config('framework', framework);
-    grunt.task.run([ 'html2js', 'concat' ]);
+  grunt.registerTask('default', function() {
+    grunt.task.run('test:bootstrap');
+    grunt.config('frameworks').forEach(function(framework) {
+      grunt.task.run(['build:'+framework]);
+    });
   });
+  grunt.registerTask('build', frameworkTask(['jshint', 'html2js', 'concat']));
+  grunt.registerTask('test', frameworkTask(['html2js', 'karma:continuous']));
+  grunt.registerTask('dev', frameworkTask(['html2js', 'karma:watch', 'watch']));
 
-  grunt.registerTask('dev', ['html2js', 'karma:watch', 'watch']);
+  //Creates a task which takes an argument and sets the framework (if not set yet).
+  //Defaults framework to bootstrap.
+  //This guarantees there will always be a framework set.
+  function frameworkTask(tasksToRun) {
+    return function(framework) {
+      if (!grunt.config('framework')) {
+        grunt.config('framework', framework || 'bootstrap');
+        grunt.log.ok('Using framework "' + grunt.config('framework') + '"');
+      }
+      grunt.task.run(tasksToRun);
+    };
+  }
 
   function html2jsTemplateRename(path) {
     //eg tabs/bootstrap/tabset.html is spit out as template/tabs/tabset.html
