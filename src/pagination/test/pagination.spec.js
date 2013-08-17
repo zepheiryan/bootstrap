@@ -1,4 +1,4 @@
-describe('pagination directive', function () {
+ddescribe('pagination directive', function () {
   var $compile, $rootScope, element;
   beforeEach(module('ui.bootstrap.pagination'));
   beforeEach(module('template/pagination/pagination.html'));
@@ -7,7 +7,7 @@ describe('pagination directive', function () {
     $rootScope = _$rootScope_;
     $rootScope.total = 47; // 5 pages
     $rootScope.currentPage = 3;
-    element = $compile('<pagination total-items="total" page="currentPage"></pagination>')($rootScope);
+    element = $compile('<div><pagination total-items="total" page="currentPage"></pagination></div>')($rootScope);
     $rootScope.$digest();
   }));
 
@@ -27,10 +27,6 @@ describe('pagination directive', function () {
     $rootScope.currentPage = value;
     $rootScope.$digest();
   }
-
-  it('has a "pagination" css class', function() {
-    expect(element.hasClass('pagination')).toBe(true);
-  });
 
   it('contains one ul and num-pages + 2 li elements', function() {
     expect(element.find('ul').length).toBe(1);
@@ -98,7 +94,7 @@ describe('pagination directive', function () {
   describe('`items-per-page`', function () {
     beforeEach(inject(function() {
       $rootScope.perpage = 5;
-      element = $compile('<pagination total-items="total" items-per-page="perpage" page="currentPage" on-select-page="selectPageHandler(page)"></pagination>')($rootScope);
+      element = $compile('<div><pagination total-items="total" items-per-page="perpage" page="currentPage" on-select-page="selectPageHandler(page)"></pagination></div>')($rootScope);
       $rootScope.$digest();
     }));
 
@@ -141,7 +137,7 @@ describe('pagination directive', function () {
   describe('executes `on-select-page` expression', function () {
     beforeEach(inject(function() {
       $rootScope.selectPageHandler = jasmine.createSpy('selectPageHandler');
-      element = $compile('<pagination total-items="total" page="currentPage" on-select-page="selectPageHandler(page)"></pagination>')($rootScope);
+      element = $compile('<div><pagination total-items="total" page="currentPage" on-select-page="selectPageHandler(page)"></pagination></div>')($rootScope);
       $rootScope.$digest();
     }));
 
@@ -166,7 +162,7 @@ describe('pagination directive', function () {
       $rootScope.total = 98; // 10 pages
       $rootScope.currentPage = 3;
       $rootScope.maxSize = 5;
-      element = $compile('<pagination total-items="total" page="currentPage" max-size="maxSize"></pagination>')($rootScope);
+      element = $compile('<div><pagination total-items="total" page="currentPage" max-size="maxSize"></pagination></div>')($rootScope);
       $rootScope.$digest();
     }));
 
@@ -198,7 +194,7 @@ describe('pagination directive', function () {
       clickPaginationEl(0);
 
       expect($rootScope.currentPage).toBe(6);
-     expect(getPaginationEl(3)).toHaveClass('active');
+      expect(getPaginationEl(3)).toHaveClass('active');
       expect(getPaginationEl(3).text()).toBe(''+$rootScope.currentPage);
     });
 
@@ -235,7 +231,7 @@ describe('pagination directive', function () {
       $rootScope.currentPage = 7;
       $rootScope.maxSize = 5;
       $rootScope.rotate = false;
-      element = $compile('<pagination total-items="total" page="currentPage" max-size="maxSize" rotate="rotate"></pagination>')($rootScope);
+      element = $compile('<div><pagination total-items="total" page="currentPage" max-size="maxSize" rotate="rotate"></pagination></div>')($rootScope);
       $rootScope.$digest();
     }));
 
@@ -295,7 +291,7 @@ describe('pagination directive', function () {
 
   describe('pagination directive with `boundary-links`', function () {
     beforeEach(inject(function() {
-      element = $compile('<pagination boundary-links="true" total-items="total" page="currentPage"></pagination>')($rootScope);
+      element = $compile('<div><pagination boundary-links="true" total-items="total" page="currentPage"></pagination></div>')($rootScope);
       $rootScope.$digest();
     }));
 
@@ -351,7 +347,7 @@ describe('pagination directive', function () {
     });
 
     it('changes "first" & "last" text from attributes', function() {
-      element = $compile('<pagination boundary-links="true" first-text="<<<" last-text=">>>" total-items="total" page="currentPage"></pagination>')($rootScope);
+      element = $compile('<div><pagination boundary-links="true" first-text="<<<" last-text=">>>" total-items="total" page="currentPage"></pagination></div>')($rootScope);
       $rootScope.$digest();
 
       expect(getPaginationEl(0).text()).toBe('<<<');
@@ -359,7 +355,7 @@ describe('pagination directive', function () {
     });
 
     it('changes "previous" & "next" text from attributes', function() {
-      element = $compile('<pagination boundary-links="true" previous-text="<<" next-text=">>" total-items="total" page="currentPage"></pagination>')($rootScope);
+      element = $compile('<div><pagination boundary-links="true" previous-text="<<" next-text=">>" total-items="total" page="currentPage"></pagination></div>')($rootScope);
       $rootScope.$digest();
 
       expect(getPaginationEl(1).text()).toBe('<<');
@@ -369,7 +365,7 @@ describe('pagination directive', function () {
     it('changes "first" & "last" text from interpolated attributes', function() {
       $rootScope.myfirstText = '<<<';
       $rootScope.mylastText = '>>>';
-      element = $compile('<pagination boundary-links="true" first-text="{{myfirstText}}" last-text="{{mylastText}}" total-items="total" page="currentPage"></pagination>')($rootScope);
+      element = $compile('<div><pagination boundary-links="true" first-text="{{myfirstText}}" last-text="{{mylastText}}" total-items="total" page="currentPage"></pagination></div>')($rootScope);
       $rootScope.$digest();
 
       expect(getPaginationEl(0).text()).toBe('<<<');
@@ -379,7 +375,7 @@ describe('pagination directive', function () {
     it('changes "previous" & "next" text from interpolated attributes', function() {
       $rootScope.previousText = '<<';
       $rootScope.nextText = '>>';
-      element = $compile('<pagination boundary-links="true" previous-text="{{previousText}}" next-text="{{nextText}}" total-items="total" page="currentPage"></pagination>')($rootScope);
+      element = $compile('<div><pagination boundary-links="true" previous-text="{{previousText}}" next-text="{{nextText}}" total-items="total" page="currentPage"></pagination></div>')($rootScope);
       $rootScope.$digest();
 
       expect(getPaginationEl(1).text()).toBe('<<');
@@ -389,7 +385,7 @@ describe('pagination directive', function () {
 
   describe('pagination directive with just number links', function () {
     beforeEach(inject(function() {
-      element = $compile('<pagination direction-links="false" total-items="total" page="currentPage"></pagination>')($rootScope);
+      element = $compile('<div><pagination direction-links="false" total-items="total" page="currentPage"></pagination></div>')($rootScope);
       $rootScope.$digest();
     }));
 
@@ -441,7 +437,7 @@ describe('pagination directive', function () {
   describe('with just boundary & number links', function () {
     beforeEach(inject(function() {
       $rootScope.directions = false;
-      element = $compile('<pagination boundary-links="true" direction-links="directions" total-items="total" page="currentPage"></pagination>')($rootScope);
+      element = $compile('<div><pagination boundary-links="true" direction-links="directions" total-items="total" page="currentPage"></pagination></div>')($rootScope);
       $rootScope.$digest();
     }));
 
@@ -473,7 +469,7 @@ describe('pagination directive', function () {
   describe('`num-pages`', function () {
     beforeEach(inject(function() {
       $rootScope.numpg = null;
-      element = $compile('<pagination total-items="total" page="currentPage" num-pages="numpg"></pagination>')($rootScope);
+      element = $compile('<div><pagination total-items="total" page="currentPage" num-pages="numpg"></pagination></div>')($rootScope);
       $rootScope.$digest();
     }));
 
@@ -493,7 +489,7 @@ describe('pagination directive', function () {
       paginationConfig.previousText = 'PR';
       paginationConfig.nextText = 'NE';
       paginationConfig.lastText = 'LA';
-      element = $compile('<pagination total-items="total" page="currentPage"></pagination>')($rootScope);
+      element = $compile('<div><pagination total-items="total" page="currentPage"></pagination></div>')($rootScope);
       $rootScope.$digest();
     }));
     afterEach(inject(function(paginationConfig) {
@@ -515,7 +511,7 @@ describe('pagination directive', function () {
 
   describe('override configuration from attributes', function () {
     beforeEach(inject(function() {
-      element = $compile('<pagination boundary-links="true" first-text="<<" previous-text="<" next-text=">" last-text=">>" total-items="total" page="currentPage"></pagination>')($rootScope);
+      element = $compile('<div><pagination boundary-links="true" first-text="<<" previous-text="<" next-text=">" last-text=">>" total-items="total" page="currentPage"></pagination></div>')($rootScope);
       $rootScope.$digest();
     }));
 
