@@ -11,6 +11,8 @@ The `sourceArray` expression can use a special `$viewValue` variable that corres
 
 Also this directive works with promises and it means that you can retrieve matches using the `$http` service with minimal effort.
 
+If active but no matches, the input will receive the class `typeahead-no-matches`.
+
 The typeahead directives provide several attributes:
 
 * `ng-model` <i class="icon-eye-open"></i>

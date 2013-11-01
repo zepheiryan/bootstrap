@@ -140,6 +140,19 @@ describe('typeahead tests', function () {
       expect(element).toBeClosed();
     });
 
+    it('should add a class if activated but no matches and remove otherwise', function () {
+      var element = prepareInputEl("<div><input ng-model='result' typeahead='item for item in source | filter:$viewValue'></div>");
+      var inputEl = findInput(element);
+      changeInputValueTo(element, 'zzzz');
+      expect(inputEl).toHaveClass('typeahead-no-matches');
+
+      changeInputValueTo(element, 'ba');
+      expect(inputEl).not.toHaveClass('typeahead-no-matches');
+
+      changeInputValueTo(element, '');
+      expect(inputEl).not.toHaveClass('typeahead-no-matches');
+    });
+
     it('should support custom model selecting function', function () {
       $scope.updaterFn = function (selectedItem) {
         return 'prefix' + selectedItem;

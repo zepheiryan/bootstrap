@@ -57,6 +57,9 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
 
       var inputFormatter = attrs.typeaheadInputFormatter ? $parse(attrs.typeaheadInputFormatter) : undefined;
 
+      //track whether there are no matches
+      var hasNoMatches = false;
+
       //INTERNAL VARIABLES
 
       //model setter executed upon match selection
@@ -93,6 +96,20 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
         scope.activeIdx = -1;
       };
 
+      var setNoMatches = function() {
+        if (!hasNoMatches) {
+          hasNoMatches = true;
+          element.addClass("typeahead-no-matches");
+        }
+      };
+
+      var unsetNoMatches = function() {
+        if (hasNoMatches) {
+          hasNoMatches = false;
+          element.removeClass("typeahead-no-matches");
+        }
+      };
+
       var getMatchesAsync = function(inputValue) {
 
         var locals = {$viewValue: inputValue};
@@ -103,6 +120,7 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
           //but we are interested only in responses that correspond to the current view value
           if (inputValue === modelCtrl.$viewValue && hasFocus) {
             if (matches.length > 0) {
+              unsetNoMatches();
 
               scope.activeIdx = 0;
               scope.matches.length = 0;
@@ -124,6 +142,7 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
               scope.position.top = scope.position.top + element.prop('offsetHeight');
 
             } else {
+              setNoMatches();
               resetMatches();
             }
             isLoadingSetter(originalScope, false);
@@ -162,6 +181,7 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
         } else {
           isLoadingSetter(originalScope, false);
           resetMatches();
+          unsetNoMatches();
         }
 
         if (isEditable) {
@@ -219,7 +239,7 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
 
         resetMatches();
 
-        //return focus to the input element if a mach was selected via a mouse click event
+        //return focus to the input element if a match was selected via a mouse click event
         element[0].focus();
       };
 
@@ -259,6 +279,7 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
 
       element.bind('blur', function (evt) {
         hasFocus = false;
+        unsetNoMatches();
       });
 
       // Keep reference to click handler to unbind it.
