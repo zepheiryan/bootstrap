@@ -290,6 +290,14 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
         }
       };
 
+      //Likely due to indirect model-input relationship, $setPristine did
+      //nothing with input value/UI; make sure it does now.
+      modelCtrl.$origSetPristine = modelCtrl.$setPristine;
+      modelCtrl.$setPristine = function () {
+          modelCtrl.$origSetPristine();
+          element.val('');
+      };
+
       $document.bind('click', dismissClickHandler);
 
       originalScope.$on('$destroy', function(){
