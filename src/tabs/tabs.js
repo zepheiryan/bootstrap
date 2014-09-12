@@ -9,26 +9,28 @@
 
 angular.module('ui.bootstrap.tabs', [])
 
-.directive('tabs', function() {
-  return function() {
-    throw new Error("The `tabs` directive is deprecated, please migrate to `tabset`. Instructions can be found at http://github.com/angular-ui/bootstrap/tree/master/CHANGELOG.md");
-  };
-})
-
 .controller('TabsetController', ['$scope', function TabsetCtrl($scope) {
   var ctrl = this,
       tabs = ctrl.tabs = $scope.tabs = [];
 
-  ctrl.select = function(tab) {
+  ctrl.select = function(selectedTab) {
     angular.forEach(tabs, function(tab) {
-      tab.active = false;
+      if (tab.active && tab !== selectedTab) {
+        tab.active = false;
+        tab.onDeselect();
+      }
     });
-    tab.active = true;
+    selectedTab.active = true;
+    selectedTab.onSelect();
   };
 
   ctrl.addTab = function addTab(tab) {
     tabs.push(tab);
-    if (tabs.length === 1 || tab.active) {
+    // we can't run the select function on the first tab
+    // since that would select it twice
+    if (tabs.length === 1) {
+      tab.active = true;
+    } else if (tab.active) {
       ctrl.select(tab);
     }
   };
@@ -54,20 +56,23 @@ angular.module('ui.bootstrap.tabs', [])
  * Tabset is the outer container for the tabs directive
  *
  * @param {boolean=} vertical Whether or not to use vertical styling for the tabs.
- * @param {string=} direction  What direction the tabs should be rendered. Available:
- * 'right', 'left', 'below'.
+ * @param {boolean=} justified Whether or not to use justified styling for the tabs.
  *
  * @example
 <example module="ui.bootstrap">
   <file name="index.html">
     <tabset>
-      <tab heading="Vertical Tab 1"><b>First</b> Content!</tab>
-      <tab heading="Vertical Tab 2"><i>Second</i> Content!</tab>
+      <tab heading="Tab 1"><b>First</b> Content!</tab>
+      <tab heading="Tab 2"><i>Second</i> Content!</tab>
     </tabset>
     <hr />
     <tabset vertical="true">
       <tab heading="Vertical Tab 1"><b>First</b> Vertical Content!</tab>
       <tab heading="Vertical Tab 2"><i>Second</i> Vertical Content!</tab>
+    </tabset>
+    <tabset justified="true">
+      <tab heading="Justified Tab 1"><b>First</b> Justified Content!</tab>
+      <tab heading="Justified Tab 2"><i>Second</i> Justified Content!</tab>
     </tabset>
   </file>
 </example>
@@ -77,19 +82,14 @@ angular.module('ui.bootstrap.tabs', [])
     restrict: 'EA',
     transclude: true,
     replace: true,
-    require: '^tabset',
-    scope: {},
+    scope: {
+      type: '@'
+    },
     controller: 'TabsetController',
     templateUrl: 'template/tabs/tabset.html',
-    compile: function(elm, attrs, transclude) {
-      return function(scope, element, attrs, tabsetCtrl) {
-        scope.vertical = angular.isDefined(attrs.vertical) ? scope.$parent.$eval(attrs.vertical) : false;
-        scope.type = angular.isDefined(attrs.type) ? scope.$parent.$eval(attrs.type) : 'tabs';
-        scope.direction = angular.isDefined(attrs.direction) ? scope.$parent.$eval(attrs.direction) : 'top';
-        scope.tabsAbove = (scope.direction != 'below');
-        tabsetCtrl.$scope = scope;
-        tabsetCtrl.$transcludeFn = transclude;
-      };
+    link: function(scope, element, attrs) {
+      scope.vertical = angular.isDefined(attrs.vertical) ? scope.$parent.$eval(attrs.vertical) : false;
+      scope.justified = angular.isDefined(attrs.justified) ? scope.$parent.$eval(attrs.justified) : false;
     }
   };
 })
@@ -182,6 +182,7 @@ angular.module('ui.bootstrap.tabs', [])
     templateUrl: 'template/tabs/tab.html',
     transclude: true,
     scope: {
+      active: '=?',
       heading: '@',
       onSelect: '&select', //This callback is called in contentHeadingTransclude
                           //once it inserts the tab's content into the dom
@@ -192,32 +193,9 @@ angular.module('ui.bootstrap.tabs', [])
     },
     compile: function(elm, attrs, transclude) {
       return function postLink(scope, elm, attrs, tabsetCtrl) {
-        var getActive, setActive;
-        if (attrs.active) {
-          getActive = $parse(attrs.active);
-          setActive = getActive.assign;
-          scope.$parent.$watch(getActive, function updateActive(value, oldVal) {
-            // Avoid re-initializing scope.active as it is already initialized
-            // below. (watcher is called async during init with value ===
-            // oldVal)
-            if (value !== oldVal) {
-              scope.active = !!value;
-            }
-          });
-          scope.active = getActive(scope.$parent);
-        } else {
-          setActive = getActive = angular.noop;
-        }
-
         scope.$watch('active', function(active) {
-          // Note this watcher also initializes and assigns scope.active to the
-          // attrs.active expression.
-          setActive(scope.$parent, active);
           if (active) {
             tabsetCtrl.select(scope);
-            scope.onSelect();
-          } else {
-            scope.onDeselect();
           }
         });
 
@@ -229,7 +207,7 @@ angular.module('ui.bootstrap.tabs', [])
         }
 
         scope.select = function() {
-          if ( ! scope.disabled ) {
+          if ( !scope.disabled ) {
             scope.active = true;
           }
         };
@@ -238,7 +216,6 @@ angular.module('ui.bootstrap.tabs', [])
         scope.$on('$destroy', function() {
           tabsetCtrl.removeTab(scope);
         });
-
 
         //We need to transclude later, once the content container is ready.
         //when this link happens, we're inside a tab heading.
@@ -294,21 +271,4 @@ angular.module('ui.bootstrap.tabs', [])
   }
 })
 
-.directive('tabsetTitles', function() {
-  return {
-    restrict: 'A',
-    require: '^tabset',
-    templateUrl: 'template/tabs/tabset-titles.html',
-    replace: true,
-    link: function(scope, elm, attrs, tabsetCtrl) {
-      if (!scope.$eval(attrs.tabsetTitles)) {
-        elm.remove();
-      } else {
-        //now that tabs location has been decided, transclude the tab titles in
-        tabsetCtrl.$transcludeFn(tabsetCtrl.$scope.$parent, function(node) {
-          elm.append(node);
-        });
-      }
-    }
-  };
-});
+;

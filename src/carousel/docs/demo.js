@@ -1,10 +1,10 @@
-function CarouselDemoCtrl($scope) {
+angular.module('ui.bootstrap.demo').controller('CarouselDemoCtrl', function ($scope) {
   $scope.myInterval = 5000;
   var slides = $scope.slides = [];
   $scope.addSlide = function() {
-    var newWidth = 200 + ((slides.length + (25 * slides.length)) % 150);
+    var newWidth = 600 + slides.length;
     slides.push({
-      image: 'http://placekitten.com/' + newWidth + '/200',
+      image: 'http://placekitten.com/' + newWidth + '/300',
       text: ['More','Extra','Lots of','Surplus'][slides.length % 4] + ' ' +
         ['Cats', 'Kittys', 'Felines', 'Cutes'][slides.length % 4]
     });
@@ -12,4 +12,4 @@ function CarouselDemoCtrl($scope) {
   for (var i=0; i<4; i++) {
     $scope.addSlide();
   }
-}
+});

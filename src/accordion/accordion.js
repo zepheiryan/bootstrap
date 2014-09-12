@@ -9,9 +9,6 @@ angular.module('ui.bootstrap.accordion', ['ui.bootstrap.collapse'])
   // This array keeps track of the accordion groups
   this.groups = [];
 
-  // Keep reference to user's scope to properly assign `is-open`
-  this.scope = $scope;
-
   // Ensure that all the groups in this accordion are closed, unless close-others explicitly says not to
   this.closeOthers = function(openGroup) {
     var closeOthers = angular.isDefined($attrs.closeOthers) ? $scope.$eval($attrs.closeOthers) : accordionConfig.closeOthers;
@@ -23,7 +20,7 @@ angular.module('ui.bootstrap.accordion', ['ui.bootstrap.collapse'])
       });
     }
   };
-  
+
   // This is called from the accordion-group directive to add itself to the accordion
   this.addGroup = function(groupScope) {
     var that = this;
@@ -38,7 +35,7 @@ angular.module('ui.bootstrap.accordion', ['ui.bootstrap.collapse'])
   this.removeGroup = function(group) {
     var index = this.groups.indexOf(group);
     if ( index !== -1 ) {
-      this.groups.splice(this.groups.indexOf(group), 1);
+      this.groups.splice(index, 1);
     }
   };
 
@@ -57,46 +54,40 @@ angular.module('ui.bootstrap.accordion', ['ui.bootstrap.collapse'])
 })
 
 // The accordion-group directive indicates a block of html that will expand and collapse in an accordion
-.directive('accordionGroup', ['$parse', '$transition', '$timeout', function($parse, $transition, $timeout) {
+.directive('accordionGroup', function() {
   return {
     require:'^accordion',         // We need this directive to be inside an accordion
     restrict:'EA',
     transclude:true,              // It transcludes the contents of the directive into the template
     replace: true,                // The element containing the directive will be replaced with the template
     templateUrl:'template/accordion/accordion-group.html',
-    scope:{ heading:'@' },        // Create an isolated scope and interpolate the heading attribute onto this scope
-    controller: ['$scope', function($scope) {
+    scope: {
+      heading: '@',               // Interpolate the heading attribute onto this scope
+      isOpen: '=?',
+      isDisabled: '=?'
+    },
+    controller: function() {
       this.setHeading = function(element) {
         this.heading = element;
       };
-    }],
+    },
     link: function(scope, element, attrs, accordionCtrl) {
-      var getIsOpen, setIsOpen;
-
       accordionCtrl.addGroup(scope);
-
-      scope.isOpen = false;
-      
-      if ( attrs.isOpen ) {
-        getIsOpen = $parse(attrs.isOpen);
-        setIsOpen = getIsOpen.assign;
-
-        accordionCtrl.scope.$watch(getIsOpen, function(value) {
-          scope.isOpen = !!value;
-        });
-      }
 
       scope.$watch('isOpen', function(value) {
         if ( value ) {
           accordionCtrl.closeOthers(scope);
         }
-        if ( setIsOpen ) {
-          setIsOpen(accordionCtrl.scope, value);
-        }
       });
+
+      scope.toggleOpen = function() {
+        if ( !scope.isDisabled ) {
+          scope.isOpen = !scope.isOpen;
+        }
+      };
     }
   };
-}])
+})
 
 // Use accordion-heading below an accordion-group to provide a heading containing HTML
 // <accordion-group>
@@ -109,13 +100,11 @@ angular.module('ui.bootstrap.accordion', ['ui.bootstrap.collapse'])
     template: '',       // In effect remove this element!
     replace: true,
     require: '^accordionGroup',
-    compile: function(element, attr, transclude) {
-      return function link(scope, element, attr, accordionGroupCtrl) {
-        // Pass the heading to the accordion-group controller
-        // so that it can be transcluded into the right place in the template
-        // [The second parameter to transclude causes the elements to be cloned so that they work in ng-repeat]
-        accordionGroupCtrl.setHeading(transclude(scope, function() {}));
-      };
+    link: function(scope, element, attr, accordionGroupCtrl, transclude) {
+      // Pass the heading to the accordion-group controller
+      // so that it can be transcluded into the right place in the template
+      // [The second parameter to transclude causes the elements to be cloned so that they work in ng-repeat]
+      accordionGroupCtrl.setHeading(transclude(scope, function() {}));
     }
   };
 })
