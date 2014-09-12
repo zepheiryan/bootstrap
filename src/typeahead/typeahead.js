@@ -114,14 +114,14 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
       var setNoMatches = function() {
         if (!hasNoMatches) {
           hasNoMatches = true;
-          element.addClass("typeahead-no-matches");
+          element.addClass('typeahead-no-matches');
         }
       };
 
       var unsetNoMatches = function() {
         if (hasNoMatches) {
           hasNoMatches = false;
-          element.removeClass("typeahead-no-matches");
+          element.removeClass('typeahead-no-matches');
         }
       };
 
