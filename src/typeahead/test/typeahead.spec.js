@@ -141,7 +141,7 @@ describe('typeahead tests', function () {
     });
 
     it('should add a class if activated but no matches and remove otherwise', function () {
-      var element = prepareInputEl("<div><input ng-model='result' typeahead='item for item in source | filter:$viewValue'></div>");
+      var element = prepareInputEl('<div><input ng-model="result" typeahead="item for item in source | filter:$viewValue"></div>');
       var inputEl = findInput(element);
       changeInputValueTo(element, 'zzzz');
       expect(inputEl).toHaveClass('typeahead-no-matches');
